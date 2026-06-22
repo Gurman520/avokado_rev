@@ -5,8 +5,10 @@ from app.auth import get_user_from_cookie
 from app.database import SessionLocal
 from app.models import Cheque, Contract, Act
 from datetime import datetime
+from sqlalchemy.orm import joinedload
 import os
 import uuid
+
 
 router = APIRouter(prefix="/cheques", tags=["cheques"])
 UPLOAD_DIR = "uploads/cheques"
@@ -15,9 +17,12 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 @router.get("/", response_class=HTMLResponse)
 async def list_cheques(request: Request, user = Depends(get_user_from_cookie)):
     db = SessionLocal()
-    cheques = db.query(Cheque).all()
+    cheques = db.query(Cheque).options(
+        joinedload(Cheque.contract),
+        joinedload(Cheque.act)
+    ).all()
     db.close()
-    return templates.TemplateResponse(request, "cheques.html", {"cheques": cheques})
+    return templates.TemplateResponse("cheques.html", {"request": request, "cheques": cheques})
 
 @router.get("/create", response_class=HTMLResponse)
 async def create_form(request: Request, user = Depends(get_user_from_cookie)):

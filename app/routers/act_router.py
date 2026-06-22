@@ -6,10 +6,11 @@ from app.database import SessionLocal
 from app.models import Act, ActStatus, Contract, ServiceItem, User, Customer
 from app.schemas import ActCreate, ServiceItemSchema
 from datetime import datetime
+from sqlalchemy.orm import joinedload
+
 import os
 import json
 import uuid
-# import pdfkit
 from weasyprint import HTML
 
 
@@ -22,9 +23,12 @@ os.makedirs(PDF_DIR, exist_ok=True)
 @router.get("/", response_class=HTMLResponse)
 async def list_acts(request: Request, user = Depends(get_user_from_cookie)):
     db = SessionLocal()
-    acts = db.query(Act).all()
+    acts = db.query(Act).options(
+        joinedload(Act.contract).joinedload(Contract.customer),
+        joinedload(Act.customer)
+    ).all()
     db.close()
-    return templates.TemplateResponse(request, "acts.html", {"acts": acts})
+    return templates.TemplateResponse("acts.html", {"request": request, "acts": acts})
 
 @router.get("/create", response_class=HTMLResponse)
 async def create_form(request: Request, user = Depends(get_user_from_cookie)):

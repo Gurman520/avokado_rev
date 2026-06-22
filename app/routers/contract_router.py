@@ -7,6 +7,8 @@ from app.models import Contract, Customer, ContractStatus
 from datetime import datetime
 import os
 import uuid
+from sqlalchemy.orm import joinedload
+
 
 router = APIRouter(prefix="/contracts", tags=["contracts"])
 UPLOAD_DIR = "uploads/contracts"
@@ -15,9 +17,9 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 @router.get("/", response_class=HTMLResponse)
 async def list_contracts(request: Request, user = Depends(get_user_from_cookie)):
     db = SessionLocal()
-    contracts = db.query(Contract).all()
+    contracts = db.query(Contract).options(joinedload(Contract.customer)).all()
     db.close()
-    return templates.TemplateResponse(request, "contracts.html", {"contracts": contracts})
+    return templates.TemplateResponse("contracts.html", {"request": request, "contracts": contracts})
 
 @router.get("/create", response_class=HTMLResponse)
 async def create_form(request: Request, user = Depends(get_user_from_cookie)):
