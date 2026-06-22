@@ -22,7 +22,7 @@ async def list_cheques(request: Request, user = Depends(get_user_from_cookie)):
         joinedload(Cheque.act)
     ).all()
     db.close()
-    return templates.TemplateResponse("cheques.html", {"request": request, "cheques": cheques})
+    return templates.TemplateResponse(request, "cheques.html", {"cheques": cheques})
 
 @router.get("/create", response_class=HTMLResponse)
 async def create_form(request: Request, user = Depends(get_user_from_cookie)):

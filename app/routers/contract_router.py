@@ -19,7 +19,7 @@ async def list_contracts(request: Request, user = Depends(get_user_from_cookie))
     db = SessionLocal()
     contracts = db.query(Contract).options(joinedload(Contract.customer)).all()
     db.close()
-    return templates.TemplateResponse("contracts.html", {"request": request, "contracts": contracts})
+    return templates.TemplateResponse(request, "contracts.html", {"contracts": contracts})
 
 @router.get("/create", response_class=HTMLResponse)
 async def create_form(request: Request, user = Depends(get_user_from_cookie)):

@@ -28,7 +28,7 @@ async def list_acts(request: Request, user = Depends(get_user_from_cookie)):
         joinedload(Act.customer)
     ).all()
     db.close()
-    return templates.TemplateResponse("acts.html", {"request": request, "acts": acts})
+    return templates.TemplateResponse(request, "acts.html", {"acts": acts})
 
 @router.get("/create", response_class=HTMLResponse)
 async def create_form(request: Request, user = Depends(get_user_from_cookie)):
