@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Договоры самозанятого{% endblock %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav>
+        <a href="/profile">Профиль</a>
+        <a href="/customers">Заказчики</a>
+        <a href="/contracts">Договоры</a>
+        <a href="/cheques">Чеки</a>
+        <a href="/acts">Акты</a>
+        <a href="/auth/logout">Выйти</a>
+    </nav>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

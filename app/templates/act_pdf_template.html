@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body { font-family: DejaVu Sans, sans-serif; }
+        .header { text-align: center; margin-bottom: 30px; }
+        .details { margin-bottom: 30px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid black; padding: 8px; text-align: left; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>АКТ ВЫПОЛНЕННЫХ РАБОТ №{{ act.number }}</h1>
+        <p>от {{ act.date }}</p>
+    </div>
+    <div class="details">
+        <p><strong>Исполнитель (самозанятый):</strong> {{ user.full_name }}, ИНН {{ user.inn }}</p>
+        <p><strong>Заказчик:</strong> {{ customer.name }}, ИНН {{ customer.inn }}</p>
+        <p><strong>Договор:</strong> №{{ contract.number }} от {{ contract.date }}</p>
+    </div>
+    <table>
+        <tr><th>№</th><th>Наименование услуги</th><th>Кол-во</th><th>Цена за ед.</th><th>Сумма</th></tr>
+        {% for s in services %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ s.description }}</td>
+            <td>{{ s.quantity }}</td>
+            <td>{{ "%.2f"|format(s.unit_price) }}</td>
+            <td>{{ "%.2f"|format(s.quantity * s.unit_price) }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <p><strong>Итого:</strong> {{ "%.2f"|format(services | sum(attribute='quantity') * services | sum(attribute='unit_price') ) }} руб.</p>
+    <br><br>
+    <p>Исполнитель: _______________  Заказчик: _______________</p>
+</body>
+</html>

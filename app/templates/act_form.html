@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Создание акта{% endblock %}
+{% block content %}
+<h2>Создание акта</h2>
+<form method="post" enctype="multipart/form-data" id="actForm">
+    <label>Договор (если есть):
+        <select name="contract_id" id="contractSelect">
+            <option value="">-- без договора --</option>
+            {% for c in contracts %}
+            <option value="{{ c.id }}">{{ c.number }} ({{ c.customer.name if c.customer }})</option>
+            {% endfor %}
+        </select>
+    </label><br>
+    <div id="customerBlock" style="display: none;">
+        <label>Заказчик:
+            <select name="customer_id">
+                {% for c in customers %}
+                <option value="{{ c.id }}">{{ c.name }}</option>
+                {% endfor %}
+            </select>
+        </label><br>
+    </div>
+    <label>Дата: <input type="date" name="date" required></label><br>
+    <label>
+        <input type="checkbox" name="generate_pdf" id="genPdf" value="true">
+        Сгенерировать PDF автоматически
+    </label><br>
+    <div id="servicesBlock" style="display: none;">
+        <h4>Услуги</h4>
+        <table id="servicesTable">
+            <tr><th>Описание</th><th>Кол-во</th><th>Цена</th><th></th></tr>
+        </table>
+        <button type="button" onclick="addRow()">Добавить услугу</button>
+    </div>
+    <div id="fileBlock">
+        <label>Загрузить готовый PDF: <input type="file" name="file" accept=".pdf"></label>
+    </div>
+    <input type="hidden" name="services_json" id="servicesJson" value="[]">
+    <button type="submit">Создать акт</button>
+</form>
+
+<script>
+document.getElementById('contractSelect').addEventListener('change', function() {
+    var custBlock = document.getElementById('customerBlock');
+    if (this.value === '') {
+        custBlock.style.display = 'block';
+    } else {
+        custBlock.style.display = 'none';
+    }
+});
+
+document.getElementById('genPdf').addEventListener('change', function() {
+    if (this.checked) {
+        document.getElementById('servicesBlock').style.display = 'block';
+        document.getElementById('fileBlock').style.display = 'none';
+    } else {
+        document.getElementById('servicesBlock').style.display = 'none';
+        document.getElementById('fileBlock').style.display = 'block';
+    }
+});
+
+function addRow() {
+    let table = document.getElementById('servicesTable');
+    let row = table.insertRow();
+    row.innerHTML = `
+        <td><input type="text" name="desc[]" required></td>
+        <td><input type="number" name="qty[]" value="1" step="0.01"></td>
+        <td><input type="number" name="price[]" value="0" step="0.01"></td>
+        <td><button type="button" onclick="this.closest('tr').remove()">Удалить</button></td>
+    `;
+}
+
+document.getElementById('actForm').addEventListener('submit', function(e) {
+    if (document.getElementById('genPdf').checked) {
+        let services = [];
+        let descs = document.getElementsByName('desc[]');
+        let qtys = document.getElementsByName('qty[]');
+        let prices = document.getElementsByName('price[]');
+        for (let i = 0; i < descs.length; i++) {
+            services.push({
+                description: descs[i].value,
+                quantity: parseFloat(qtys[i].value) || 0,
+                unit_price: parseFloat(prices[i].value) || 0
+            });
+        }
+        document.getElementById('servicesJson').value = JSON.stringify(services);
+    }
+});
+</script>
+{% endblock %}

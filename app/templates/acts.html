@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Акты{% endblock %}
+{% block content %}
+<h2>Акты выполненных работ</h2>
+<a href="/acts/create">Создать акт</a>
+<table border="1">
+    <tr><th>Номер</th><th>Дата</th><th>Договор</th><th>Статус</th><th>PDF</th></tr>
+    {% for a in acts %}
+    <tr>
+        <td>{{ a.number }}</td>
+        <td>{{ a.date }}</td>
+        <td>{{ a.contract.number if a.contract }}</td>
+        <td>{{ a.status.value }}</td>
+        <td>
+            {% if a.pdf_path %}
+            <a href="/acts/{{ a.id }}/download">Скачать</a>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

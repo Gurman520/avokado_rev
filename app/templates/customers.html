@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Заказчики{% endblock %}
+{% block content %}
+<h2>Заказчики</h2>
+<a href="/customers/create">Добавить заказчика</a>
+<table border="1">
+    <tr><th>Название</th><th>Телефон</th><th>ИНН</th><th>Адрес</th></tr>
+    {% for c in customers %}
+    <tr>
+        <td>{{ c.name }}</td>
+        <td>{{ c.phone or '' }}</td>
+        <td>{{ c.inn or '' }}</td>
+        <td>{{ c.legal_address or '' }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

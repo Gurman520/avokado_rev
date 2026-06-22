@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Мой профиль{% endblock %}
+{% block content %}
+<h2>Мой профиль</h2>
+<form method="post" action="/profile/edit">
+    <label>ФИО: <input type="text" name="full_name" value="{{ user.full_name }}" required></label><br>
+    <label>ИНН: <input type="text" name="inn" value="{{ user.inn }}" required></label><br>
+    <label>СНИЛС: <input type="text" name="snils" value="{{ user.snils or '' }}"></label><br>
+    <label>Email: <input type="email" name="email" value="{{ user.email or '' }}"></label><br>
+    <label>Паспорт: <input type="text" name="passport" value="{{ user.passport or '' }}"></label><br>
+    <label>БИК: <input type="text" name="bik" value="{{ user.bik or '' }}"></label><br>
+    <label>КПП: <input type="text" name="kpp" value="{{ user.kpp or '' }}"></label><br>
+    <label>Расчётный счёт: <input type="text" name="account_number" value="{{ user.account_number or '' }}"></label><br>
+    <label>Корр. счёт: <input type="text" name="corr_account" value="{{ user.corr_account or '' }}"></label><br>
+    <label>Банк: <input type="text" name="bank_name" value="{{ user.bank_name or '' }}"></label><br>
+    <button type="submit">Сохранить</button>
+</form>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Чеки{% endblock %}
+{% block content %}
+<h2>Чеки</h2>
+<a href="/cheques/create">Добавить чек</a>
+<table border="1">
+    <tr><th>Дата</th><th>Сумма</th><th>Договор</th><th>Ссылка</th><th>Файл</th></tr>
+    {% for ch in cheques %}
+    <tr>
+        <td>{{ ch.date }}</td>
+        <td>{{ ch.amount }}</td>
+        <td>{{ ch.contract.number if ch.contract }}</td>
+        <td><a href="{{ ch.link }}" target="_blank">Открыть</a></td>
+        <td>{% if ch.file_path %}<a href="/{{ ch.file_path }}">Скачать</a>{% endif %}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

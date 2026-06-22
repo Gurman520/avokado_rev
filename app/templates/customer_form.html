@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Новый заказчик{% endblock %}
+{% block content %}
+<h2>Новый заказчик</h2>
+<form method="post" id="custForm">
+    <label>Тип:
+        <select name="type" id="custType">
+            <option value="legal">Юридическое лицо</option>
+            <option value="individual">Физическое лицо</option>
+        </select>
+    </label><br>
+    <label id="nameLabel">Наименование: <input type="text" name="name" required></label><br>
+    <label>Телефон: <input type="text" name="phone"></label><br>
+    <label>Email: <input type="email" name="email"></label><br>
+    <div id="legalFields">
+        <label>Юр. адрес: <input type="text" name="legal_address"></label><br>
+        <label>Почтовый адрес: <input type="text" name="postal_address"></label><br>
+        <label>ИНН: <input type="text" name="inn"></label><br>
+        <label>КПП: <input type="text" name="kpp"></label><br>
+        <label>БИК: <input type="text" name="bik"></label><br>
+        <label>Расч. счёт: <input type="text" name="account_number"></label><br>
+        <label>Корр. счёт: <input type="text" name="corr_account"></label><br>
+        <label>Банк: <input type="text" name="bank_name"></label><br>
+    </div>
+    <button type="submit">Создать</button>
+</form>
+
+<script>
+document.getElementById('custType').addEventListener('change', function() {
+    var legalFields = document.getElementById('legalFields');
+    var nameLabel = document.getElementById('nameLabel');
+    if (this.value === 'individual') {
+        legalFields.style.display = 'none';
+        nameLabel.innerHTML = 'ФИО: <input type="text" name="name" required>';
+    } else {
+        legalFields.style.display = 'block';
+        nameLabel.innerHTML = 'Наименование: <input type="text" name="name" required>';
+    }
+});
+// Trigger on load
+window.onload = function() {
+    document.getElementById('custType').dispatchEvent(new Event('change'));
+};
+</script>
+{% endblock %}

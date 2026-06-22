@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Договоры{% endblock %}
+{% block content %}
+<h2>Договоры</h2>
+<a href="/contracts/create">Новый договор</a>
+<table border="1">
+    <tr><th>Номер</th><th>Дата</th><th>Сумма</th><th>Заказчик</th><th>Статус</th><th>Файл</th><th></th></tr>
+    {% for c in contracts %}
+    <tr>
+        <td>{{ c.number }}</td>
+        <td>{{ c.date }}</td>
+        <td>{{ c.amount }}</td>
+        <td>{{ c.customer.name if c.customer }}</td>
+        <td>{{ c.status.value }}</td>
+        <td>{% if c.file_path %}<a href="/contracts/{{ c.id }}/download">Скачать</a>{% endif %}</td>
+        <td>
+            {% if c.status.value == 'Активен' %}
+            <a href="/contracts/{{ c.id }}/cancel">Аннулировать</a>
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
