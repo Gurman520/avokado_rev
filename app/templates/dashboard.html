@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Дашборд{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Дашборд</h1>
+        <p>Обзор вашей деятельности</p>
+    </div>
+    <a href="/contracts/create" class="btn btn-primary">+ Новый договор</a>
+</div>
+
+<div class="stats-grid">
+    <a href="/customers/" class="stat-card">
+        <div class="stat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        </div>
+        <div class="stat-label">Заказчики</div>
+        <div class="stat-value">{{ stats.customers }}</div>
+    </a>
+    <a href="/contracts/" class="stat-card">
+        <div class="stat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="stat-label">Договоры (активных: {{ stats.active_contracts }})</div>
+        <div class="stat-value">{{ stats.contracts }}</div>
+    </a>
+    <a href="/cheques/" class="stat-card">
+        <div class="stat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        </div>
+        <div class="stat-label">Чеки</div>
+        <div class="stat-value">{{ stats.cheques }}</div>
+    </a>
+    <a href="/acts/" class="stat-card">
+        <div class="stat-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <div class="stat-label">Акты</div>
+        <div class="stat-value">{{ stats.acts }}</div>
+    </a>
+    <a href="/cheques/" class="stat-card">
+        <div class="stat-icon" style="background:#ecfdf5;color:#10b981;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+        </div>
+        <div class="stat-label">Заработано</div>
+        <div class="stat-value">{{ "%.0f"|format(total_earned) }} ₽</div>
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">Последние договоры</div>
+    {% if recent_contracts %}
+    <div class="table-wrap" style="border:none; box-shadow:none;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Номер</th>
+                    <th>Дата</th>
+                    <th>Заказчик</th>
+                    <th>Сумма договора</th>
+                    <th>Заработано</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for c in recent_contracts %}
+                <tr>
+                    <td><strong>{{ c.number }}</strong></td>
+                    <td>{{ c.date.strftime('%d.%m.%Y') }}</td>
+                    <td>{{ c.customer.name if c.customer else '—' }}</td>
+                    <td class="mono">{{ "%.2f"|format(c.amount or 0) }} ₽</td>
+                    <td class="mono"><strong>{{ "%.2f"|format(earned_map.get(c.id, 0)) }} ₽</strong></td>
+                    <td>
+                        {% if c.status.value == 'Активен' %}
+                        <span class="badge badge-success badge-dot">Активен</span>
+                        {% else %}
+                        <span class="badge badge-gray badge-dot">Аннулирован</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty">
+        <div class="empty-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <h3>Пока нет договоров</h3>
+        <p>Создайте первый договор, чтобы начать вести учёт</p>
+        <a href="/contracts/create" class="btn btn-primary">+ Новый договор</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

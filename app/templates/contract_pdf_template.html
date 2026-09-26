@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        @page { size: A4; margin: 2cm 1.5cm; }
+        body { font-family: "DejaVu Sans", Arial, sans-serif; font-size: 11pt; line-height: 1.45; color: #000; }
+        h1 { text-align: center; font-size: 14pt; margin: 0 0 4px; }
+        h2 { text-align: center; font-size: 12pt; margin: 0 0 24px; font-weight: normal; }
+        h3 { font-size: 12pt; margin: 18px 0 8px; }
+        p { margin: 6px 0; text-align: justify; }
+        .header-info { margin-bottom: 20px; }
+        .header-row { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .requisites { margin-top: 30px; padding-top: 20px; border-top: 1px solid #000; }
+        .signatures { display: flex; justify-content: space-between; margin-top: 40px; }
+        .signature-col { width: 45%; }
+        .signature-line { border-bottom: 1px solid #000; height: 20px; margin: 4px 0; }
+        table.items { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        table.items th, table.items td { border: 1px solid #000; padding: 6px 8px; font-size: 10pt; }
+        table.items th { background: #f0f0f0; text-align: center; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .bold { font-weight: bold; }
+        .small { font-size: 10pt; }
+    </style>
+</head>
+<body>
+
+<h1>ДОГОВОР ВОЗМЕЗДНОГО ОКАЗАНИЯ УСЛУГ № {{ contract.number }}</h1>
+<h2>г. {{ city|default('_______________') }} &nbsp;&nbsp;&nbsp;&nbsp; {{ contract.date.strftime('%d.%m.%Y') }}</h2>
+
+<div class="header-info">
+    <p><span class="bold">{{ user.full_name }}</span>, именуемый в дальнейшем «Исполнитель», 
+    ИНН {{ user.inn }}{% if user.snils %}, СНИЛС {{ user.snils }}{% endif %}{% if user.passport %}, паспорт {{ user.passport }}{% endif %}{% if user.email %}, e-mail: {{ user.email }}{% endif %}, с одной стороны, и</p>
+
+    {% if customer.type and customer.type.value == 'individual' %}
+    <p><span class="bold">{{ customer.name }}</span>, именуемый(-ая) в дальнейшем «Заказчик»,
+    {% if customer.phone %}телефон: {{ customer.phone }}{% endif %}{% if customer.email %}, e-mail: {{ customer.email }}{% endif %}{% if customer.legal_address %}, адрес: {{ customer.legal_address }}{% endif %}, с другой стороны,</p>
+    {% else %}
+    <p><span class="bold">{{ customer.name }}</span>, именуемое в дальнейшем «Заказчик», в лице уполномоченного представителя,
+    ИНН {{ customer.inn or '—' }}{% if customer.kpp %}, КПП {{ customer.kpp }}{% endif %}{% if customer.legal_address %}, юридический адрес: {{ customer.legal_address }}{% endif %}{% if customer.email %}, e-mail: {{ customer.email }}{% endif %}, с другой стороны,</p>
+    {% endif %}
+
+    <p>совместно именуемые «Стороны», заключили настоящий Договор о нижеследующем.</p>
+</div>
+
+<h3>1. ПРЕДМЕТ ДОГОВОРА</h3>
+<p>1.1. Исполнитель обязуется по заданию Заказчика оказать услуги, указанные в Приложениях (актах выполненных работ) к настоящему Договору, а Заказчик обязуется принять и оплатить эти услуги.</p>
+<p>1.2. Услуги оказываются на основании заявок Заказчика, оформляемых в письменной форме или по электронной почте.</p>
+<p>1.3. Объём, состав и стоимость услуг определяются в актах выполненных работ, являющихся неотъемлемой частью Договора.</p>
+
+<h3>2. ПРАВА И ОБЯЗАННОСТИ СТОРОН</h3>
+<p>2.1. Исполнитель обязуется:</p>
+<p>2.1.1. Оказать услуги лично, качественно и в согласованные Сторонами сроки.</p>
+<p>2.1.2. Предоставлять Заказчику отчёты о ходе оказания услуг по его запросу.</p>
+<p>2.1.3. Передать Заказчику результат оказанных услуг в форме, согласованной Сторонами.</p>
+<p>2.2. Заказчик обязуется:</p>
+<p>2.2.1. Предоставить Исполнителю информацию и материалы, необходимые для оказания услуг.</p>
+<p>2.2.2. Принять и оплатить оказанные услуги в порядке и сроки, установленные Договором.</p>
+<p>2.3. Исполнитель вправе привлекать третьих лиц для исполнения обязательств по Договору, оставаясь ответственным перед Заказчиком за результат.</p>
+
+<h3>3. СТОИМОСТЬ И ПОРЯДОК РАСЧЁТОВ</h3>
+<p>3.1. Стоимость услуг по Договору определяется на основании актов выполненных работ и{% if contract.amount %} составляет {{ "%.2f"|format(contract.amount) }} ({{ contract.amount|num2words }} рублей){% endif %}.</p>
+<p>3.2. Оплата производится в безналичном порядке путём перечисления денежных средств на счёт Исполнителя{% if user.account_number %} (р/с {{ user.account_number }}{% if user.bank_name %}, {{ user.bank_name }}{% endif %}{% if user.bik %}, БИК {{ user.bik }}{% endif %}{% if user.corr_account %}, к/с {{ user.corr_account }}{% endif %}){% endif %}.</p>
+<p>3.3. Оплата производится в течение 5 (пяти) рабочих дней с момента подписания соответствующего акта выполненных работ.</p>
+<p>3.4. Исполнитель применяет специальный налоговый режим «Налог на профессиональный доход» (самозанятый). НДС не облагается.</p>
+<p>3.5. По факту получения оплаты Исполнитель формирует чек в приложении «Мой налог» и направляет его Заказчику.</p>
+
+<h3>4. ПОРЯДОК СДАЧИ-ПРИЁМКИ УСЛУГ</h3>
+<p>4.1. По завершении оказания услуг Исполнитель направляет Заказчику акт выполненных работ.</p>
+<p>4.2. Заказчик в течение 5 (пяти) рабочих дней подписывает акт либо направляет мотивированный отказ.</p>
+<p>4.3. При отсутствии мотивированного отказа в указанный срок услуги считаются принятыми, а акт — подписанным.</p>
+
+<h3>5. ОТВЕТСТВЕННОСТЬ СТОРОН</h3>
+<p>5.1. За неисполнение или ненадлежащее исполнение обязательств Стороны несут ответственность в соответствии с законодательством РФ.</p>
+<p>5.2. Заказчик несёт ответственность за достоверность предоставленной информации и материалов.</p>
+<p>5.3. Исполнитель не несёт ответственности за последствия, возникшие в результате использования Заказчиком результатов услуг способами, не предусмотренными Договором.</p>
+
+<h3>6. ОБСТОЯТЕЛЬСТВА НЕПРЕОДОЛИМОЙ СИЛЫ</h3>
+<p>6.1. Стороны освобождаются от ответственности за неисполнение обязательств, если оно вызвано обстоятельствами непреодолимой силы.</p>
+<p>6.2. Сторона, подвергшаяся действию таких обстоятельств, обязана уведомить другую Сторону в течение 5 (пяти) рабочих дней.</p>
+
+<h3>7. РАЗРЕШЕНИЕ СПОРОВ</h3>
+<p>7.1. Все споры разрешаются путём переговоров. Претензионный порядок обязателен, срок ответа на претензию — 10 (десять) рабочих дней.</p>
+<p>7.2. При невозможности урегулирования спор передаётся в суд в соответствии с законодательством РФ.</p>
+
+<h3>8. СРОК ДЕЙСТВИЯ И ПРОЧИЕ УСЛОВИЯ</h3>
+<p>8.1. Договор вступает в силу с момента подписания и действует до полного исполнения обязательств Сторонами.</p>
+<p>8.2. Все изменения оформляются дополнительными соглашениями в письменной форме.</p>
+<p>8.3. Договор составлен в двух экземплярах, имеющих равную юридическую силу, по одному для каждой Стороны.</p>
+<p>8.4. Во всём, что не урегулировано Договором, Стороны руководствуются законодательством РФ.</p>
+
+<h3>9. РЕКВИЗИТЫ И ПОДПИСИ СТОРОН</h3>
+
+<div class="signatures">
+    <div class="signature-col">
+        <p class="bold">ИСПОЛНИТЕЛЬ</p>
+        <p>{{ user.full_name }}</p>
+        <p class="small">ИНН: {{ user.inn }}</p>
+        {% if user.snils %}<p class="small">СНИЛС: {{ user.snils }}</p>{% endif %}
+        {% if user.passport %}<p class="small">Паспорт: {{ user.passport }}</p>{% endif %}
+        {% if user.account_number %}<p class="small">Р/с: {{ user.account_number }}</p>{% endif %}
+        {% if user.bank_name %}<p class="small">Банк: {{ user.bank_name }}</p>{% endif %}
+        {% if user.bik %}<p class="small">БИК: {{ user.bik }}</p>{% endif %}
+        {% if user.corr_account %}<p class="small">К/с: {{ user.corr_account }}</p>{% endif %}
+        {% if user.email %}<p class="small">Email: {{ user.email }}</p>{% endif %}
+        <div class="signature-line"></div>
+        <p class="small text-center">подпись</p>
+    </div>
+    <div class="signature-col">
+        <p class="bold">ЗАКАЗЧИК</p>
+        <p>{{ customer.name }}</p>
+        {% if customer.inn %}<p class="small">ИНН: {{ customer.inn }}</p>{% endif %}
+        {% if customer.kpp %}<p class="small">КПП: {{ customer.kpp }}</p>{% endif %}
+        {% if customer.legal_address %}<p class="small">Адрес: {{ customer.legal_address }}</p>{% endif %}
+        {% if customer.account_number %}<p class="small">Р/с: {{ customer.account_number }}</p>{% endif %}
+        {% if customer.bank_name %}<p class="small">Банк: {{ customer.bank_name }}</p>{% endif %}
+        {% if customer.bik %}<p class="small">БИК: {{ customer.bik }}</p>{% endif %}
+        {% if customer.corr_account %}<p class="small">К/с: {{ customer.corr_account }}</p>{% endif %}
+        {% if customer.email %}<p class="small">Email: {{ customer.email }}</p>{% endif %}
+        <div class="signature-line"></div>
+        <p class="small text-center">подпись</p>
+    </div>
+</div>
+
+</body>
+</html>

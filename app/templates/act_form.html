@@ -1,81 +1,136 @@
 {% extends "base.html" %}
 {% block title %}Создание акта{% endblock %}
 {% block content %}
-<h2>Создание акта</h2>
-<form method="post" enctype="multipart/form-data" id="actForm">
-    <label>Договор (если есть):
-        <select name="contract_id" id="contractSelect">
-            <option value="">-- без договора --</option>
-            {% for c in contracts %}
-            <option value="{{ c.id }}">{{ c.number }} ({{ c.customer.name if c.customer }})</option>
-            {% endfor %}
-        </select>
-    </label><br>
-    <div id="customerBlock" style="display: none;">
-        <label>Заказчик:
-            <select name="customer_id">
-                {% for c in customers %}
-                <option value="{{ c.id }}">{{ c.name }}</option>
-                {% endfor %}
-            </select>
-        </label><br>
+<div class="page-header">
+    <div>
+        <h1>Создание акта</h1>
+        <p>Сформируйте PDF автоматически или приложите готовый файл</p>
     </div>
-    <label>Дата: <input type="date" name="date" required></label><br>
-    <label>
-        <input type="checkbox" name="generate_pdf" id="genPdf" value="true">
-        Сгенерировать PDF автоматически
-    </label><br>
-    <div id="servicesBlock" style="display: none;">
-        <h4>Услуги</h4>
-        <table id="servicesTable">
-            <tr><th>Описание</th><th>Кол-во</th><th>Цена</th><th></th></tr>
-        </table>
-        <button type="button" onclick="addRow()">Добавить услугу</button>
+</div>
+
+<form method="post" enctype="multipart/form-data" id="actForm" class="card">
+    <div class="form-section">
+        <h3>Основное</h3>
+        <div class="form-grid">
+            <div class="field full">
+                <label>Договор</label>
+                <select name="contract_id" id="contractSelect">
+                    <option value="">— без договора (разовый акт) —</option>
+                    {% for c in contracts %}
+                    <option value="{{ c.id }}">{{ c.number }} — {{ c.customer.name if c.customer }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field full" id="customerBlock" style="display:none;">
+                <label>Заказчик</label>
+                <select name="customer_id">
+                    {% for c in customers %}
+                    <option value="{{ c.id }}">{{ c.name }}{% if c.type and c.type.value == 'individual' %} (физ. лицо){% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label>Дата акта</label>
+                <input type="date" name="date" required>
+            </div>
+            <div class="field">
+                <label>Итоговая сумма акта, ₽</label>
+                <input type="number" step="0.01" name="total_amount" placeholder="0.00">
+                <div class="hint">Укажите вручную для загружаемых актов. При автогенерации рассчитается автоматически.</div>
+            </div>
+        </div>
     </div>
-    <div id="fileBlock">
-        <label>Загрузить готовый PDF: <input type="file" name="file" accept=".pdf"></label>
+
+    <div class="form-section">
+        <h3>Способ формирования</h3>
+        <div class="form-grid">
+            <div class="field full">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" name="generate_pdf" id="genPdf" value="true" style="width:auto;">
+                    Сгенерировать PDF автоматически на основе списка услуг
+                </label>
+                <div class="hint">Если не отмечено — можно приложить готовый файл</div>
+            </div>
+        </div>
     </div>
+
+    <div class="form-section" id="servicesBlock" style="display:none;">
+        <h3>Список услуг</h3>
+        <div class="table-wrap" style="box-shadow:none;">
+            <table id="servicesTable">
+                <thead>
+                    <tr>
+                        <th style="width:50%;">Описание</th>
+                        <th style="width:15%;">Кол-во</th>
+                        <th style="width:20%;">Цена, ₽</th>
+                        <th style="width:15%;"></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <button type="button" class="btn btn-secondary mt-4" onclick="addRow()">+ Добавить услугу</button>
+    </div>
+
+    <div class="form-section" id="fileBlock">
+        <h3>Готовый файл</h3>
+        <div class="field">
+            <label>Загрузить PDF акта</label>
+            <input type="file" name="file" accept=".pdf">
+            <div class="hint">Если файл не выбран, акт будет создан пустым — можно добавить позже</div>
+        </div>
+    </div>
+
     <input type="hidden" name="services_json" id="servicesJson" value="[]">
-    <button type="submit">Создать акт</button>
+
+    <div class="form-actions">
+        <a href="/acts/" class="btn btn-secondary">Отмена</a>
+        <button type="submit" class="btn btn-primary">Создать акт</button>
+    </div>
 </form>
 
 <script>
-document.getElementById('contractSelect').addEventListener('change', function() {
-    var custBlock = document.getElementById('customerBlock');
-    if (this.value === '') {
-        custBlock.style.display = 'block';
-    } else {
-        custBlock.style.display = 'none';
-    }
-});
+const contractSelect = document.getElementById('contractSelect');
+const customerBlock = document.getElementById('customerBlock');
+const genPdf = document.getElementById('genPdf');
+const servicesBlock = document.getElementById('servicesBlock');
+const fileBlock = document.getElementById('fileBlock');
 
-document.getElementById('genPdf').addEventListener('change', function() {
-    if (this.checked) {
-        document.getElementById('servicesBlock').style.display = 'block';
-        document.getElementById('fileBlock').style.display = 'none';
+function updateContract() {
+    customerBlock.style.display = contractSelect.value === '' ? '' : 'none';
+}
+contractSelect.addEventListener('change', updateContract);
+updateContract();
+
+genPdf.addEventListener('change', () => {
+    if (genPdf.checked) {
+        servicesBlock.style.display = '';
+        fileBlock.style.display = 'none';
+        if (document.querySelector('#servicesTable tbody').children.length === 0) addRow();
     } else {
-        document.getElementById('servicesBlock').style.display = 'none';
-        document.getElementById('fileBlock').style.display = 'block';
+        servicesBlock.style.display = 'none';
+        fileBlock.style.display = '';
     }
 });
 
 function addRow() {
-    let table = document.getElementById('servicesTable');
-    let row = table.insertRow();
+    const tbody = document.querySelector('#servicesTable tbody');
+    const row = document.createElement('tr');
     row.innerHTML = `
-        <td><input type="text" name="desc[]" required></td>
+        <td><input type="text" name="desc[]" required placeholder="Наименование услуги"></td>
         <td><input type="number" name="qty[]" value="1" step="0.01"></td>
         <td><input type="number" name="price[]" value="0" step="0.01"></td>
-        <td><button type="button" onclick="this.closest('tr').remove()">Удалить</button></td>
+        <td class="actions"><button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">×</button></td>
     `;
+    tbody.appendChild(row);
 }
 
-document.getElementById('actForm').addEventListener('submit', function(e) {
-    if (document.getElementById('genPdf').checked) {
-        let services = [];
-        let descs = document.getElementsByName('desc[]');
-        let qtys = document.getElementsByName('qty[]');
-        let prices = document.getElementsByName('price[]');
+document.getElementById('actForm').addEventListener('submit', () => {
+    if (genPdf.checked) {
+        const services = [];
+        const descs = document.getElementsByName('desc[]');
+        const qtys = document.getElementsByName('qty[]');
+        const prices = document.getElementsByName('price[]');
         for (let i = 0; i < descs.length; i++) {
             services.push({
                 description: descs[i].value,

@@ -1,24 +1,68 @@
 {% extends "base.html" %}
 {% block title %}Договоры{% endblock %}
 {% block content %}
-<h2>Договоры</h2>
-<a href="/contracts/create">Новый договор</a>
-<table border="1">
-    <tr><th>Номер</th><th>Дата</th><th>Сумма</th><th>Заказчик</th><th>Статус</th><th>Файл</th><th></th></tr>
-    {% for c in contracts %}
-    <tr>
-        <td>{{ c.number }}</td>
-        <td>{{ c.date }}</td>
-        <td>{{ c.amount }}</td>
-        <td>{{ c.customer.name if c.customer }}</td>
-        <td>{{ c.status.value }}</td>
-        <td>{% if c.file_path %}<a href="/contracts/{{ c.id }}/download">Скачать</a>{% endif %}</td>
-        <td>
-            {% if c.status.value == 'Активен' %}
-            <a href="/contracts/{{ c.id }}/cancel">Аннулировать</a>
-            {% endif %}
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+<div class="page-header">
+    <div>
+        <h1>Договоры</h1>
+        <p>Всего: {{ contracts|length }}</p>
+    </div>
+    <a href="/contracts/create" class="btn btn-primary">+ Новый договор</a>
+</div>
+
+{% if contracts %}
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Номер</th>
+                <th>Дата</th>
+                <th>Заказчик</th>
+                <th>Сумма</th>
+                <th>Статус</th>
+                <th>Файл</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in contracts %}
+            <tr>
+                <td><strong>{{ c.number }}</strong></td>
+                <td>{{ c.date.strftime('%d.%m.%Y') }}</td>
+                <td>{{ c.customer.name if c.customer else '—' }}</td>
+                <td class="mono">{{ "%.2f"|format(c.amount or 0) }} ₽</td>
+                <td>
+                    {% if c.status.value == 'Активен' %}
+                    <span class="badge badge-success badge-dot">Активен</span>
+                    {% else %}
+                    <span class="badge badge-gray badge-dot">Аннулирован</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if c.file_path %}
+                    <a href="/contracts/{{ c.id }}/download" class="btn btn-secondary btn-sm">Скачать</a>
+                    {% else %}—{% endif %}
+                </td>
+                <td class="actions">
+                    <a href="/contracts/{{ c.id }}/edit" class="btn btn-secondary btn-sm">Изменить</a>
+                    <a href="/contracts/{{ c.id }}/generate" class="btn btn-primary btn-sm">PDF</a>
+                    {% if c.status.value == 'Активен' %}
+                    <a href="/contracts/{{ c.id }}/cancel" class="btn btn-danger btn-sm"
+                    onclick="return confirm('Аннулировать договор {{ c.number }}?')">Аннулировать</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty">
+    <div class="empty-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    </div>
+    <h3>Пока нет договоров</h3>
+    <p>Создайте первый договор, чтобы начать вести учёт</p>
+    <a href="/contracts/create" class="btn btn-primary">+ Новый договор</a>
+</div>
+{% endif %}
 {% endblock %}

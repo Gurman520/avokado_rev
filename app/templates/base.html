@@ -2,20 +2,48 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Договоры самозанятого{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Учёт договоров{% endblock %}</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <nav>
-        <a href="/profile">Профиль</a>
-        <a href="/customers">Заказчики</a>
-        <a href="/contracts">Договоры</a>
-        <a href="/cheques">Чеки</a>
-        <a href="/acts">Акты</a>
-        <a href="/auth/logout">Выйти</a>
-    </nav>
-    <main>
-        {% block content %}{% endblock %}
-    </main>
+<header class="navbar">
+    <div class="nav-container">
+        <a href="/" class="brand">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="9" y1="13" x2="15" y2="13"></line>
+                <line x1="9" y1="17" x2="15" y2="17"></line>
+            </svg>
+            Договоры
+        </a>
+        <nav class="nav-links">
+            {% set path = request.url.path %}
+            <a href="/" class="{{ 'active' if path == '/' else '' }}">Дашборд</a>
+            <a href="/customers/" class="{{ 'active' if path.startswith('/customers') else '' }}">Заказчики</a>
+            <a href="/contracts/" class="{{ 'active' if path.startswith('/contracts') else '' }}">Договоры</a>
+            <a href="/cheques/" class="{{ 'active' if path.startswith('/cheques') else '' }}">Чеки</a>
+            <a href="/acts/" class="{{ 'active' if path.startswith('/acts') else '' }}">Акты</a>
+        </nav>
+        <div class="nav-user">
+            <a href="/profile" class="{{ 'active' if path.startswith('/profile') else '' }}">Профиль</a>
+            <a href="/auth/logout">Выйти</a>
+        </div>
+    </div>
+</header>
+<main class="container">
+    {% set msg = request.query_params.get('msg') %}
+    {% if msg == 'created' %}
+    <div class="alert alert-success">✓ Запись успешно создана</div>
+    {% elif msg == 'saved' %}
+    <div class="alert alert-success">✓ Изменения сохранены</div>
+    {% elif msg == 'cancelled' %}
+    <div class="alert alert-success">✓ Договор аннулирован</div>
+    {% elif msg == 'deleted' %}
+    <div class="alert alert-success">✓ Удалено</div>
+    {% endif %}
+    {% block content %}{% endblock %}
+</main>
 </body>
 </html>

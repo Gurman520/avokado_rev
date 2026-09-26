@@ -1,19 +1,60 @@
 {% extends "base.html" %}
-{% block title %}Новый договор{% endblock %}
+{% block title %}{{ 'Редактирование' if contract else 'Новый' }} договор{% endblock %}
 {% block content %}
-<h2>Новый договор</h2>
-<form method="post" enctype="multipart/form-data">
-    <label>Номер: <input type="text" name="number" required></label><br>
-    <label>Дата: <input type="date" name="date" required></label><br>
-    <label>Сумма: <input type="number" step="0.01" name="amount" required></label><br>
-    <label>Заказчик:
-        <select name="customer_id">
-            {% for c in customers %}
-            <option value="{{ c.id }}">{{ c.name }} ({{ "Физ." if c.type == "individual" else "Юр." }})</option>
-            {% endfor %}
-        </select>
-    </label><br>
-    <label>Файл договора: <input type="file" name="file" accept=".pdf,.doc,.docx,.jpg,.png"></label><br>
-    <button type="submit">Создать</button>
+<div class="page-header">
+    <div>
+        <h1>{{ 'Редактирование договора' if contract else 'Новый договор' }}</h1>
+        <p>Заполните основные реквизиты</p>
+    </div>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="card"
+      action="{{ '/contracts/' ~ contract.id ~ '/edit' if contract else '/contracts/create' }}">
+    <div class="form-section">
+        <h3>Реквизиты договора</h3>
+        <div class="form-grid">
+            <div class="field">
+                <label>Номер договора</label>
+                <input type="text" name="number" value="{{ contract.number if contract else '' }}" required>
+            </div>
+            <div class="field">
+                <label>Дата</label>
+                <input type="date" name="date" value="{{ contract.date.strftime('%Y-%m-%d') if contract else '' }}" required>
+            </div>
+            <div class="field">
+                <label>Сумма, ₽</label>
+                <input type="number" step="0.01" name="amount" value="{{ contract.amount if contract and contract.amount else '' }}">
+            </div>
+            <div class="field">
+                <label>Заказчик</label>
+                <select name="customer_id" required>
+                    {% for c in customers %}
+                    <option value="{{ c.id }}" {{ 'selected' if contract and contract.customer_id == c.id else '' }}>{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% if contract %}
+            <div class="field">
+                <label>Статус</label>
+                <select name="status">
+                    <option value="Активен" {{ 'selected' if contract.status.value == 'Активен' else '' }}>Активен</option>
+                    <option value="Аннулирован" {{ 'selected' if contract.status.value == 'Аннулирован' else '' }}>Аннулирован</option>
+                </select>
+            </div>
+            {% endif %}
+            <div class="field full">
+                <label>Файл договора</label>
+                <input type="file" name="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                {% if contract and contract.file_path %}
+                <div class="hint">Текущий файл загружен. Новый заменит его.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <a href="/contracts/" class="btn btn-secondary">Отмена</a>
+        <button type="submit" class="btn btn-primary">{{ 'Сохранить' if contract else 'Создать' }}</button>
+    </div>
 </form>
 {% endblock %}

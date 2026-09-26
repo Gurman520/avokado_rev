@@ -3,7 +3,7 @@ from fastapi.responses import RedirectResponse, HTMLResponse
 from app.template_config import templates
 from app.auth import get_user_from_cookie
 from app.database import SessionLocal
-from app.models import Cheque, Contract, Act
+from app.models import Cheque, Contract, Act, ContractStatus
 from datetime import datetime
 from sqlalchemy.orm import joinedload
 import os
@@ -27,7 +27,7 @@ async def list_cheques(request: Request, user = Depends(get_user_from_cookie)):
 @router.get("/create", response_class=HTMLResponse)
 async def create_form(request: Request, user = Depends(get_user_from_cookie)):
     db = SessionLocal()
-    contracts = db.query(Contract).filter(Contract.status == "Активен").all()
+    contracts = db.query(Contract).options(joinedload(Contract.customer)).filter(Contract.status == ContractStatus.ACTIVE).all()
     # Получаем все акты для выбора
     acts = db.query(Act).all()
     db.close()
@@ -68,4 +68,4 @@ async def create_cheque(
     db.add(cheque)
     db.commit()
     db.close()
-    return RedirectResponse(url="/cheques", status_code=303)
+    return RedirectResponse(url="/cheques/?msg=created", status_code=303)

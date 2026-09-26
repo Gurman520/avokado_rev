@@ -1,17 +1,58 @@
 {% extends "base.html" %}
 {% block title %}Заказчики{% endblock %}
 {% block content %}
-<h2>Заказчики</h2>
-<a href="/customers/create">Добавить заказчика</a>
-<table border="1">
-    <tr><th>Название</th><th>Телефон</th><th>ИНН</th><th>Адрес</th></tr>
-    {% for c in customers %}
-    <tr>
-        <td>{{ c.name }}</td>
-        <td>{{ c.phone or '' }}</td>
-        <td>{{ c.inn or '' }}</td>
-        <td>{{ c.legal_address or '' }}</td>
-    </tr>
-    {% endfor %}
-</table>
+<div class="page-header">
+    <div>
+        <h1>Заказчики</h1>
+        <p>Всего: {{ customers|length }}</p>
+    </div>
+    <a href="/customers/create" class="btn btn-primary">+ Новый заказчик</a>
+</div>
+
+{% if customers %}
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Наименование / ФИО</th>
+                <th>Тип</th>
+                <th>Телефон</th>
+                <th>Email</th>
+                <th>ИНН</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in customers %}
+            <tr>
+                <td><strong>{{ c.name }}</strong></td>
+                <td>
+                    {% if c.type and c.type.value == 'individual' %}
+                    <span class="badge badge-gray">Физ. лицо</span>
+                    {% else %}
+                    <span class="badge badge-gray">Юр. лицо</span>
+                    {% endif %}
+                </td>
+                <td>{{ c.phone or '—' }}</td>
+                <td>{{ c.email or '—' }}</td>
+                <td class="mono">{{ c.inn or '—' }}</td>
+                <td class="actions">
+                    <a href="/customers/{{ c.id }}/edit" class="btn btn-secondary btn-sm">Изменить</a>
+                    <a href="/contracts/create?customer_id={{ c.id }}" class="btn btn-secondary btn-sm">Договор</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty">
+    <div class="empty-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+    </div>
+    <h3>Пока нет заказчиков</h3>
+    <p>Добавьте первого заказчика, чтобы создавать договоры</p>
+    <a href="/customers/create" class="btn btn-primary">+ Новый заказчик</a>
+</div>
+{% endif %}
 {% endblock %}

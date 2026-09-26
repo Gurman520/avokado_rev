@@ -1,18 +1,57 @@
 {% extends "base.html" %}
 {% block title %}Чеки{% endblock %}
 {% block content %}
-<h2>Чеки</h2>
-<a href="/cheques/create">Добавить чек</a>
-<table border="1">
-    <tr><th>Дата</th><th>Сумма</th><th>Договор</th><th>Ссылка</th><th>Файл</th></tr>
-    {% for ch in cheques %}
-    <tr>
-        <td>{{ ch.date }}</td>
-        <td>{{ ch.amount }}</td>
-        <td>{{ ch.contract.number if ch.contract }}</td>
-        <td><a href="{{ ch.link }}" target="_blank">Открыть</a></td>
-        <td>{% if ch.file_path %}<a href="/{{ ch.file_path }}">Скачать</a>{% endif %}</td>
-    </tr>
-    {% endfor %}
-</table>
+<div class="page-header">
+    <div>
+        <h1>Чеки</h1>
+        <p>Всего: {{ cheques|length }}</p>
+    </div>
+    <a href="/cheques/create" class="btn btn-primary">+ Новый чек</a>
+</div>
+
+{% if cheques %}
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Сумма</th>
+                <th>Договор</th>
+                <th>Акт</th>
+                <th>Ссылка</th>
+                <th>Файл</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ch in cheques %}
+            <tr>
+                <td>{{ ch.date.strftime('%d.%m.%Y') }}</td>
+                <td class="mono"><strong>{{ "%.2f"|format(ch.amount or 0) }} ₽</strong></td>
+                <td>{{ ch.contract.number if ch.contract else '—' }}</td>
+                <td>{{ ch.act.number if ch.act else '—' }}</td>
+                <td>
+                    {% if ch.link %}
+                    <a href="{{ ch.link }}" target="_blank" class="btn btn-secondary btn-sm">Открыть</a>
+                    {% else %}—{% endif %}
+                </td>
+                <td>
+                    {% if ch.file_path %}
+                    <a href="/{{ ch.file_path }}" target="_blank" class="btn btn-secondary btn-sm">Скачать</a>
+                    {% else %}—{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty">
+    <div class="empty-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+    </div>
+    <h3>Пока нет чеков</h3>
+    <p>Добавьте первый чек, чтобы связать оплату с договором</p>
+    <a href="/cheques/create" class="btn btn-primary">+ Новый чек</a>
+</div>
+{% endif %}
 {% endblock %}

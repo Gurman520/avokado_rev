@@ -1,22 +1,75 @@
 {% extends "base.html" %}
 {% block title %}Акты{% endblock %}
 {% block content %}
-<h2>Акты выполненных работ</h2>
-<a href="/acts/create">Создать акт</a>
-<table border="1">
-    <tr><th>Номер</th><th>Дата</th><th>Договор</th><th>Статус</th><th>PDF</th></tr>
-    {% for a in acts %}
-    <tr>
-        <td>{{ a.number }}</td>
-        <td>{{ a.date }}</td>
-        <td>{{ a.contract.number if a.contract }}</td>
-        <td>{{ a.status.value }}</td>
-        <td>
-            {% if a.pdf_path %}
-            <a href="/acts/{{ a.id }}/download">Скачать</a>
-            {% endif %}
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+<div class="page-header">
+    <div>
+        <h1>Акты выполненных работ</h1>
+        <p>Всего: {{ acts|length }}</p>
+    </div>
+    <a href="/acts/create" class="btn btn-primary">+ Создать акт</a>
+</div>
+
+{% if acts %}
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>Номер</th>
+                <th>Дата</th>
+                <th>Договор</th>
+                <th>Заказчик</th>
+                <th>Сумма</th>
+                <th>Статус</th>
+                <th>Файл</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for a in acts %}
+            <tr>
+                <td><strong>{{ a.number }}</strong></td>
+                <td>{{ a.date.strftime('%d.%m.%Y') }}</td>
+                <td>{{ a.contract.number if a.contract else '—' }}</td>
+                <td>
+                    {% if a.customer %}{{ a.customer.name }}
+                    {% elif a.contract and a.contract.customer %}{{ a.contract.customer.name }}
+                    {% else %}—{% endif %}
+                </td>
+                <td class="mono">{{ "%.2f"|format(a.total_amount or 0) }} ₽</td>
+                <td>
+                    {% if a.status.value == 'PDF сгенерирован' %}
+                        <span class="badge badge-success badge-dot">PDF готов</span>
+                    {% elif a.status.value == 'Аннулирован' %}
+                        <span class="badge badge-danger badge-dot">Аннулирован</span>
+                    {% else %}
+                        <span class="badge badge-gray badge-dot">Пустой</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if a.pdf_path %}
+                    <a href="/acts/{{ a.id }}/download" class="btn btn-primary btn-sm">Скачать</a>
+                    {% else %}—{% endif %}
+                </td>
+                <td class="actions">
+                    <a href="/acts/{{ a.id }}/edit" class="btn btn-secondary btn-sm">Изменить</a>
+                    {% if a.status.value != 'Аннулирован' %}
+                    <a href="/acts/{{ a.id }}/cancel" class="btn btn-danger btn-sm"
+                       onclick="return confirm('Аннулировать акт {{ a.number }}?')">Аннулировать</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty">
+    <div class="empty-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    </div>
+    <h3>Пока нет актов</h3>
+    <p>Создайте первый акт выполненных работ</p>
+    <a href="/acts/create" class="btn btn-primary">+ Создать акт</a>
+</div>
+{% endif %}
 {% endblock %}

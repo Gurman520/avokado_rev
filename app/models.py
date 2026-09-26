@@ -10,6 +10,7 @@ class ContractStatus(str, enum.Enum):
 class ActStatus(str, enum.Enum):
     EMPTY = "Пустой"
     PDF_GENERATED = "PDF сгенерирован"
+    CANCELED = "Аннулирован"
 
 class CustomerType(str, enum.Enum):
     LEGAL = "legal"
@@ -89,6 +90,7 @@ class Act(Base):
     customer = relationship("Customer", back_populates="acts")
     services = relationship("ServiceItem", back_populates="act", cascade="all, delete-orphan")
     cheques = relationship("Cheque", back_populates="act")
+    total_amount = Column(Float, nullable=True)  # итоговая сумма акта
 
 class ServiceItem(Base):
     __tablename__ = "service_items"

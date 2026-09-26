@@ -1,45 +1,82 @@
 {% extends "base.html" %}
-{% block title %}Новый заказчик{% endblock %}
+{% block title %}{{ 'Редактирование' if customer else 'Новый' }} заказчика{% endblock %}
 {% block content %}
-<h2>Новый заказчик</h2>
-<form method="post" id="custForm">
-    <label>Тип:
-        <select name="type" id="custType">
-            <option value="legal">Юридическое лицо</option>
-            <option value="individual">Физическое лицо</option>
-        </select>
-    </label><br>
-    <label id="nameLabel">Наименование: <input type="text" name="name" required></label><br>
-    <label>Телефон: <input type="text" name="phone"></label><br>
-    <label>Email: <input type="email" name="email"></label><br>
-    <div id="legalFields">
-        <label>Юр. адрес: <input type="text" name="legal_address"></label><br>
-        <label>Почтовый адрес: <input type="text" name="postal_address"></label><br>
-        <label>ИНН: <input type="text" name="inn"></label><br>
-        <label>КПП: <input type="text" name="kpp"></label><br>
-        <label>БИК: <input type="text" name="bik"></label><br>
-        <label>Расч. счёт: <input type="text" name="account_number"></label><br>
-        <label>Корр. счёт: <input type="text" name="corr_account"></label><br>
-        <label>Банк: <input type="text" name="bank_name"></label><br>
+<div class="page-header">
+    <div>
+        <h1>{{ 'Редактирование заказчика' if customer else 'Новый заказчик' }}</h1>
+        <p>Заполните данные для договоров и актов</p>
     </div>
-    <button type="submit">Создать</button>
+</div>
+
+<form method="post" id="custForm" class="card"
+      action="{{ '/customers/' ~ customer.id ~ '/edit' if customer else '/customers/create' }}">
+    <div class="form-section">
+        <h3>Основное</h3>
+        <div class="form-grid">
+            <div class="field full">
+                <label>Тип заказчика</label>
+                <select name="type" id="custType">
+                    <option value="legal" {{ 'selected' if customer and customer.type and customer.type.value == 'legal' else '' }}>Юридическое лицо</option>
+                    <option value="individual" {{ 'selected' if customer and customer.type and customer.type.value == 'individual' else '' }}>Физическое лицо</option>
+                </select>
+            </div>
+            <div class="field full">
+                <label id="nameLabel">Наименование организации</label>
+                <input type="text" name="name" value="{{ customer.name if customer else '' }}" required>
+            </div>
+            <div class="field">
+                <label>Телефон</label>
+                <input type="tel" name="phone" value="{{ customer.phone or '' if customer else '' }}">
+            </div>
+            <div class="field">
+                <label>Email</label>
+                <input type="email" name="email" value="{{ customer.email or '' if customer else '' }}">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section" id="legalFields">
+        <h3>Адреса</h3>
+        <div class="form-grid">
+            <div class="field full">
+                <label>Юридический адрес</label>
+                <input type="text" name="legal_address" value="{{ customer.legal_address or '' if customer else '' }}">
+            </div>
+            <div class="field full">
+                <label>Почтовый адрес</label>
+                <input type="text" name="postal_address" value="{{ customer.postal_address or '' if customer else '' }}">
+            </div>
+        </div>
+    </div>
+
+    <div class="form-section" id="legalFields2">
+        <h3>Реквизиты</h3>
+        <div class="form-grid">
+            <div class="field"><label>ИНН</label><input type="text" name="inn" value="{{ customer.inn or '' if customer else '' }}"></div>
+            <div class="field"><label>КПП</label><input type="text" name="kpp" value="{{ customer.kpp or '' if customer else '' }}"></div>
+            <div class="field full"><label>Банк</label><input type="text" name="bank_name" value="{{ customer.bank_name or '' if customer else '' }}"></div>
+            <div class="field"><label>БИК</label><input type="text" name="bik" value="{{ customer.bik or '' if customer else '' }}"></div>
+            <div class="field"><label>Расчётный счёт</label><input type="text" name="account_number" value="{{ customer.account_number or '' if customer else '' }}"></div>
+            <div class="field"><label>Корреспондентский счёт</label><input type="text" name="corr_account" value="{{ customer.corr_account or '' if customer else '' }}"></div>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <a href="/customers/" class="btn btn-secondary">Отмена</a>
+        <button type="submit" class="btn btn-primary">{{ 'Сохранить' if customer else 'Создать заказчика' }}</button>
+    </div>
 </form>
 
 <script>
-document.getElementById('custType').addEventListener('change', function() {
-    var legalFields = document.getElementById('legalFields');
-    var nameLabel = document.getElementById('nameLabel');
-    if (this.value === 'individual') {
-        legalFields.style.display = 'none';
-        nameLabel.innerHTML = 'ФИО: <input type="text" name="name" required>';
-    } else {
-        legalFields.style.display = 'block';
-        nameLabel.innerHTML = 'Наименование: <input type="text" name="name" required>';
-    }
-});
-// Trigger on load
-window.onload = function() {
-    document.getElementById('custType').dispatchEvent(new Event('change'));
-};
+const typeSelect = document.getElementById('custType');
+const nameLabel = document.getElementById('nameLabel');
+const legalBlocks = [document.getElementById('legalFields'), document.getElementById('legalFields2')];
+function updateType() {
+    const isIndividual = typeSelect.value === 'individual';
+    nameLabel.textContent = isIndividual ? 'ФИО' : 'Наименование организации';
+    legalBlocks.forEach(b => b.style.display = isIndividual ? 'none' : '');
+}
+typeSelect.addEventListener('change', updateType);
+updateType();
 </script>
 {% endblock %}

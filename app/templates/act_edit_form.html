@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Редактирование акта{% endblock %}
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1>Редактирование акта {{ act.number }}</h1>
+        <p>Обновите данные или замените файл</p>
+    </div>
+</div>
+
+{% if act.status.value == 'Аннулирован' %}
+<div class="alert alert-error">
+    Акт аннулирован. Редактирование недоступно.
+</div>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data" action="/acts/{{ act.id }}/edit" class="card">
+    <div class="form-section">
+        <h3>Основное</h3>
+        <div class="form-grid">
+            <div class="field full">
+                <label>Договор</label>
+                <select name="contract_id">
+                    <option value="">— без договора —</option>
+                    {% for c in contracts %}
+                    <option value="{{ c.id }}" {{ 'selected' if act.contract_id == c.id else '' }}>{{ c.number }} — {{ c.customer.name if c.customer }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field full">
+                <label>Заказчик (если без договора)</label>
+                <select name="customer_id">
+                    <option value="">— не указан —</option>
+                    {% for c in customers %}
+                    <option value="{{ c.id }}" {{ 'selected' if act.customer_id == c.id else '' }}>{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field">
+                <label>Дата акта</label>
+                <input type="date" name="date" value="{{ act.date.strftime('%Y-%m-%d') }}" required>
+            </div>
+            <div class="field">
+                <label>Итоговая сумма, ₽</label>
+                <input type="number" step="0.01" name="total_amount" value="{{ act.total_amount or '' }}">
+            </div>
+            <div class="field full">
+                <label>Заменить PDF акта</label>
+                <input type="file" name="file" accept=".pdf">
+                {% if act.pdf_path %}<div class="hint">Текущий файл загружен. Новый заменит его.</div>{% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="form-actions">
+        <a href="/acts/" class="btn btn-secondary">Отмена</a>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+    </div>
+</form>
+{% endblock %}

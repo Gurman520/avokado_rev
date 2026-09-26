@@ -44,4 +44,4 @@ async def edit_profile(
     user_db = db.query(User).filter(User.id == user.id).first()
     update_user_profile(db, user_db, profile)
     db.close()
-    return RedirectResponse(url="/profile", status_code=303)
+    return RedirectResponse(url="/profile?msg=saved", status_code=303)
